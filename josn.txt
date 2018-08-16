@@ -1,0 +1,159 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+)
+
+type Address struct {
+	Type    string
+	City    string
+	Country string
+}
+
+type VCard struct {
+	FirstName string
+	LastName  string
+	Address   []*Address
+	Remark    string
+}
+
+func main() {
+
+	pa := &Address{"private", "Aartselaar", "Belgium"}
+	wa := &Address{"work", "boom", "belgium"}
+
+	vc := VCard{"Jan", "Kersschot", []*Address{pa, wa}, "none"}
+
+	js, _ := json.Marshal(vc)
+
+	fmt.Printf("JSON format: %s", js)
+
+	data := VCard{}
+
+	// file, _ := os.OpenFile("vcard.json", os.O_CREATE|os.O_WRONLY, 0666)
+	// defer file.Close()
+	// enc := json.NewEncoder(file)
+	// err := enc.Encode(vc)
+	// if err != nil {
+	// 	log.Println("Error in encoding json")
+	// }
+
+	file, err := ioutil.ReadFile("vcard.json")
+	// Load("vcard.json", &v)
+	// log.Println(file)
+	if err != nil {
+		panic(err)
+	}
+	json.Unmarshal(file, &data)
+	for _, v := range data.Address {
+		fmt.Println(v.City)
+	}
+
+	// os.Stdout.WriteString("hello, world\n")
+	// f, _ := os.OpenFile("test.txt", os.O_CREATE|os.O_WRONLY, 0666)
+	// defer f.Close()
+	// f.WriteString("hello, world in a file\n")
+	// defer file.Close()
+}
+
+// type JsonStruct struct {
+// }
+
+// func NewJsonStruct() *JsonStruct {
+// 	return &JsonStruct{}
+// }
+
+// func (jst *JsonStruct) Load(filename string, v interface{}) {
+// 	//ReadFile函数会读取文件的全部内容，并将结果以[]byte类型返回
+// 	data, err := ioutil.ReadFile(filename)
+// 	if err != nil {
+// 		return
+// 	}
+
+// 	//读取的数据为json格式，需要进行解码
+// 	err = json.Unmarshal(data, v)
+// 	if err != nil {
+// 		return
+// 	}
+// }
+
+
+//-------------------------------------
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+)
+
+// var inputReader *bufio.Reader
+
+var input string
+var err error
+var nrchars, nrwords, nrlines int
+
+func main() {
+	nrchars, nrwords, nrlines = 0, 0, 0
+
+	inputReader := bufio.NewReader(os.Stdin)
+	fmt.Println("Please enter some input: ")
+	input, err = inputReader.ReadString('\n')
+	num := inputReader.Size()
+	fmt.Println(num)
+	if err == nil {
+		fmt.Printf("The input was: %s\n", input)
+	}
+
+	//*****************
+	inputReadera := bufio.NewReader(os.Stdin)
+	fmt.Println("please enter your name:")
+	inputa, err := inputReadera.ReadString('\n')
+
+	if err != nil {
+		fmt.Println("There were errors reading,exting program.")
+		return
+	}
+	fmt.Printf("your name is %s", inputa)
+
+	switch inputa {
+	case "a\r\n":
+		fmt.Println("welcome a!")
+	case "s\r\n":
+		fmt.Println("welcome s!")
+	case "d\r\n":
+		fmt.Println("welcome d!")
+	default:
+		fmt.Printf("you are not welcome here goodbye")
+	}
+
+	//*****************
+
+	for {
+		inputReaderc := bufio.NewReader(os.Stdin)
+		inputc, err := inputReaderc.ReadString('\n')
+		fmt.Println(inputc)
+		if err != nil {
+			fmt.Printf("An error occurred:%s\n", err)
+		}
+		if inputc == "S\r\n" {
+			fmt.Println("Here are the counts:")
+			fmt.Printf("Number of characters: %d\n", nrchars)
+			fmt.Printf("Number of words: %d\n", nrwords)
+			fmt.Printf("Number of lines: %d\n", nrlines)
+			os.Exit(0)
+		}
+		Counters(input)
+	}
+
+}
+
+func Counters(input string) {
+	nrchars += len(input) - 2 // -2 for \r\n
+	nrwords += len(strings.Fields(input))
+	nrlines++
+}
+///--------------------------------------------------------------------

@@ -21,7 +21,7 @@ func main() {
 	fmt.Println(data)
 	fmt.Printf("read %d bytes:%q\n", count, data[:count])
 
-	fmt.Println("*************************************")
+	fmt.Println("*****************数组 & 切片********************")
 	var arr1 = new([5]int) //  生成的空白指针类型
 	var arr2 [5]int        //
 	arr1[0] = 1
@@ -159,7 +159,7 @@ func main() {
 			"alpha": 34, "bravo": 56, "charlie": 23,
 			"delta": 87, "echo": 56, "foxtrot": 12,
 			"golf": 34, "hotel": 16, "indio": 87,
-			"juliet": 65, "kili": 43, "lima": 98}
+			"juliet": 65, "kili": 43, "lima": 98, "lissma": 98}
 	)
 
 	for key, val := range barVal {
@@ -178,8 +178,42 @@ func main() {
 	for _, k := range keys {
 		fmt.Println(barVal[k])
 	}
-	fmt.Println("**************************************")
+	fmt.Println("**************** map 键值对换**********************")
 	invMap := make(map[int]string, len(barVal))
+	for k, v := range barVal {
+		if _, ok := invMap[v]; !ok {
+			invMap[v] = k
+		}
+	}
+	fmt.Println(invMap)
+	fmt.Println("**************** 标准库**********************")
+	fmt.Println("**************** 正则 **********************")
+	// 字符串
+	// searchIn := "4458"
+	fmt.Println("**************** 结构体 **********************")
+
+	type innerS struct {
+		in1 int
+		in2 int
+	}
+	type outerS struct {
+		b   int
+		c   float32
+		in1 int // =>{6 3.3 5 60 {0 10}}
+		int
+		innerS
+	}
+
+	outer := new(outerS) // 使用new 创建 指针类型
+	outer.b = 6
+	outer.c = 3.3
+	outer.int = 60
+	outer.in1 = 5
+	outer.in2 = 10
+	fmt.Println(*outer)
+	outer2 := outerS{6, 8.5, 10, 60, innerS{40, 20}} // 使用结构体字面量 引用类型
+	fmt.Println(outer2)
+	fmt.Println(outer2.in1)
 }
 func sum(a []int) int {
 	s := 0

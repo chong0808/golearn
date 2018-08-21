@@ -8,7 +8,29 @@ import (
 	"sort"
 )
 
+type readJson struct {
+	FirstName string
+	LastName  string
+	Address   []*Address
+	Remark    string
+}
+type Address struct {
+	Type    string
+	City    string
+	Country string
+}
+
 func main() {
+	fmt.Println("**************** string **********************")
+
+	xs := "text"
+	xB := []rune(xs)
+	xB[0] = '我'
+	xs = string(xB)
+	fmt.Println(xs)
+
+	fmt.Println("**************** 读取json文件 **********************")
+
 	file, err := os.Open("./../vcard.json")
 	if err != nil {
 		log.Fatal(err)
@@ -20,6 +42,12 @@ func main() {
 	}
 	fmt.Println(data)
 	fmt.Printf("read %d bytes:%q\n", count, data[:count])
+	sjson := string(data)
+
+	fmt.Println(sjson)
+	fmt.Println("*****************json 转换 为struct********************")
+	bjson := data[:count] // 读取出来的对应json byte字节
+	fmt.Println(bjson)
 
 	fmt.Println("*****************数组 & 切片********************")
 	var arr1 = new([5]int) //  生成的空白指针类型
@@ -214,7 +242,214 @@ func main() {
 	outer2 := outerS{6, 8.5, 10, 60, innerS{40, 20}} // 使用结构体字面量 引用类型
 	fmt.Println(outer2)
 	fmt.Println(outer2.in1)
+	fmt.Println("**************** 结构体 方法 (定义结构方法要放在main外面)**********************")
+
+	typerInnerString := typerInner{name: 10}
+	fmt.Println(typerInnerString.getName())
+	typerInnerString.setName(200)
+	fmt.Println(typerInnerString.getName())
+
+	en := &Engine{false, false}
+	fmt.Println(en)
+	en.stopAction()
+	fmt.Println(*en)
+
+	fmt.Println("**************** 结构体 多层嵌套 **********************")
+	merkel := Mercedes{Car{10, Engine{false, false}}}
+	fmt.Println(merkel.stop)
+	merkel.stopAction()
+	fmt.Println(merkel.stop)
+	fmt.Println(merkel.numberOfWheel())
+	fmt.Println("**************** 结构体 多层聚合 **********************")
+	merkel2 := Mercede2{&Car{10, Engine{false, false}}}
+	fmt.Println(merkel2.car.stop)
+	merkel2.car.stopAction()
+	fmt.Println(merkel2.car.stop)
+	fmt.Println(merkel2.car.numberOfWheel())
+	// test := packq.Test{"test"}
+	// fmt.Println(test)
+
+	fmt.Println("**************** 结构体 多重继承 **********************")
+
+	mm := new(ChildBase)
+	mm.Magic()
+	mm.MoreMagic() // 输出指向base结构
+	fmt.Println("**************** 接口 **********************")
+	var sq = new(Square) // 实例一个结构指针
+	sq.side = 10
+	fmt.Println(sq)
+	rg := Rectangle{20} // 实例一个结构指针
+	fmt.Println(rg)
+	var shaper Shaper
+	shaper = rg
+	// ----
+	// shaper := []Shaper{sq, &rg}
+
+	fmt.Println(shaper)
+	fmt.Println(shaper.Area())
+
+	fmt.Println("**************** 接口 检测和转换接口变量的类型**********************")
+	t, ok := shaper.(Rectangle) // 检查接口是否有*Rectangle类型的变量
+	fmt.Println(t)
+	fmt.Println(ok)
+	t1, ok1 := shaper.(*Square)
+	fmt.Println(t1)  // => <nil>
+	fmt.Println(ok1) // => false
+	fmt.Println("**************** 接口 使用方法集与接口**********************")
+	var lst List
+	if LongEnough(lst) {
+		fmt.Println("- lst is long enough")
+	}
+	plst := new(List)
+	CountInto(plst, 1, 10)
+	fmt.Println(plst)
+	if LongEnough(plst) {
+		fmt.Println("- plst is long enough")
+	}
+	fmt.Println("**************** 接口 排序**********************")
+	/*
+		* 1.实现len方法
+		* 2.比较放啊 less
+		* 3.交换元素 swap
+		调用
+		data := []int{74, 59, 238, -784, 9845, 959, 905, 0, 0, 42, 7586, -5467984, 7586}
+		a := sort.IntArray(data)
+		sort.Sort(a)
+	*/
 }
+
+type List []int
+
+func (l List) Len() int {
+	return len(l)
+}
+func (l *List) Append(val int) {
+	*l = append(*l, val)
+}
+
+type Appender interface {
+	Append(int)
+}
+
+func CountInto(a Appender, start, end int) {
+	for i := start; i <= end; i++ {
+		a.Append(i)
+	}
+}
+
+type Lener interface {
+	Len() int
+}
+
+func LongEnough(l Lener) bool {
+	return l.Len()*10 > 42
+}
+
+type Shaper interface {
+	Area() float32
+}
+type Square struct {
+	side float32
+}
+type Rectangle struct {
+	side float32
+}
+
+func (sq *Square) Area() float32 {
+	return sq.side * sq.side
+}
+
+func (sq Rectangle) Area() float32 {
+	return sq.side * sq.side
+}
+
+type Simpler interface {
+	Get() int
+	Set(int)
+}
+
+func callSimpler(s Simpler) int {
+	s.Set(10)
+	return s.Get()
+}
+
+type simple struct {
+	num int
+}
+
+func (s *simple) Get() int {
+	return s.num
+}
+func (s *simple) Set(num int) {
+	s.num = num
+}
+
+type Base struct{}
+
+func (Base) Magic() {
+	fmt.Println("base magic")
+}
+
+func (self Base) MoreMagic() {
+	self.Magic()
+	self.Magic()
+}
+
+type ChildBase struct {
+	Base
+}
+
+func (ChildBase) Magic() {
+	fmt.Println("childBase magic")
+}
+
+type Engine struct {
+	stop  bool
+	start bool
+}
+
+func (en *Engine) startAction() {
+	en.start = true
+	en.stop = false
+}
+func (en *Engine) stopAction() {
+	en.start = false
+	en.stop = true
+}
+
+type Car struct {
+	wheelCount int
+	Engine
+}
+
+func (c Car) numberOfWheel() int {
+	return c.wheelCount
+}
+
+type Mercedes struct {
+	Car // 嵌套
+}
+
+type Mercede2 struct {
+	car *Car // 聚合
+}
+
+func (m *Mercedes) sayHiToMerkel() string {
+	return "Merkel"
+}
+
+type typerInner struct {
+	name int
+}
+
+func (_self *typerInner) setName(name int) {
+	_self.name = name
+}
+
+func (_self *typerInner) getName() int {
+	return _self.name
+}
+
 func sum(a []int) int {
 	s := 0
 	for i := 0; i < len(a); i++ {

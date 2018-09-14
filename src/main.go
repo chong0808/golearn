@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -41,7 +42,7 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(data)
-	fmt.Printf("read %d bytes:%q\n", count, data[:count])
+	fmt.Printf("read %d bytes:%q\n", count, data[:])
 	sjson := string(data)
 
 	fmt.Println(sjson)
@@ -90,12 +91,12 @@ func main() {
 	num := 2
 	num1 := 2.0
 	// 判断类型
-	fmt.Println("type:", reflect.TypeOf(str))  // =>string
-	fmt.Println("type:", reflect.TypeOf(num))  // =>int
-	fmt.Println("type:", reflect.TypeOf(num1)) // => float64
-	fmt.Println("type:", reflect.TypeOf(arr1)) // =>*[5]int
-	fmt.Println("type:", reflect.TypeOf(arr2))
-	fmt.Println("type:", reflect.TypeOf(array))
+	fmt.Println("type:", reflect.TypeOf(str))   // =>string
+	fmt.Println("type:", reflect.TypeOf(num))   // =>int
+	fmt.Println("type:", reflect.TypeOf(num1))  // => float64
+	fmt.Println("type:", reflect.TypeOf(arr1))  // =>*[5]int
+	fmt.Println("type:", reflect.TypeOf(arr2))  // =>[5]int
+	fmt.Println("type:", reflect.TypeOf(array)) // =>[]int
 	fmt.Println("**************************************")
 	var ar = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 	var a = ar[5:7]
@@ -275,6 +276,7 @@ func main() {
 	mm.Magic()
 	mm.MoreMagic() // 输出指向base结构
 	fmt.Println("**************** 接口 **********************")
+
 	var sq = new(Square) // 实例一个结构指针
 	sq.side = 10
 	fmt.Println(sq)
@@ -316,8 +318,148 @@ func main() {
 		a := sort.IntArray(data)
 		sort.Sort(a)
 	*/
+	fmt.Println("**************** 解析 json**********************")
+	var s ServerSlice
+	strJson := `{"servers":[{"serverName":"Shanghai_VPN","serverIP":"127.0.0.1"},{"serverName":"Beijing_VPN","serverIP":"127.0.0.2"}]}`
+	strToByte := []byte(strJson)
+	json.Unmarshal(strToByte, &s)
+	fmt.Println(s.Servers)
+	for key, index := range s.Servers {
+		fmt.Println(key)
+		fmt.Println(index)
+	}
+
+	b, errss := json.Marshal(s)
+	if errss != nil {
+		fmt.Println(errss)
+	}
+
+	fmt.Println(string(b))
+
+	fmt.Println("**************** 解析 json 实例**********************")
+	dataString := `{
+				"_id": "5add48ccab35760cfc04f30a",
+				"user_id": [
+						"5add48ccab35760cfc04f307"
+				],
+				"messages": [
+						{
+								"Attachement": [
+									{
+										"id": "5ad93c8226e29e131400385c",
+										"name": "下载.jpg",
+										"thumbnail": "data:image/jpeg;base64,/9j/4AAQSkZJRgAB",
+										"types": "image/jpeg",
+										"width": "225",
+										"height": "224"
+								}
+								],
+								"p_messages": [],
+								"_id": "5add4c7f59ebdf0fb8052e95",
+								"created_time": 1524452479436,
+								"source": 1,
+								"from": "5aa777d49ad1649c88080ff9",
+								"message": "222",
+								"cur_session_id": "5add4952ab35760cfc04f316",
+								"to": "5add48ccab35760cfc04f309"
+						},
+						{
+								"Attachement": [],
+								"p_messages": [],
+								"_id": "5add4c8359ebdf0fb8052e96",
+								"created_time": 1524452483360,
+								"source": 2,
+								"from": "5add48ccab35760cfc04f309",
+								"message": "22",
+								"cur_session_id": "5add4952ab35760cfc04f316",
+								"to": "5aa777d49ad1649c88080ff9"
+						}
+				],
+				"updated_time": 1524451532,
+				"created_time": 1524451532,
+				"session_id": "0000C9-0001-5add48ccab35760cfc04f308",
+				"types": "web",
+				"status": true,
+				"creator": "000100-0001-5add48ccab35760cfc04f307",
+				"system_id": 9001
+		}`
+
+	dataByte := []byte(dataString)
+	var jsonObj interface{}
+
+	errs := json.Unmarshal(dataByte, &jsonObj)
+	if errs != nil {
+		fmt.Println(errs)
+	}
+
+	m := jsonObj.(map[string]interface{})
+	fmt.Println(m)
+
+	for key, val := range m {
+		switch v_type := val.(type) {
+		case string:
+			fmt.Println(key, "is string", v_type)
+		case bool:
+			fmt.Println(key, "is bool", v_type)
+		case int:
+			fmt.Println(key, "is int", v_type)
+		case float64:
+			fmt.Println(key, "is float64", v_type)
+		case []interface{}:
+			fmt.Println(key, "is interface", v_type)
+		default:
+			fmt.Println(key, "is default", v_type)
+		}
+	}
+
+	fmt.Println("**************** 解析 json 实例2**********************")
+	var user User
+	user.updated_time = 154545848
+	user.system_id = 9001
+	user.session_id = "dddd"
+	fmt.Println(user)
 }
 
+type User struct {
+	updated_time float64
+	created_time float64
+	system_id    float64
+	creator      string
+	status       bool
+	session_id   string
+	user_id      []string
+	messages     []Messages
+	_id          string
+	types        string
+}
+
+type Messages struct {
+	_id            string
+	created_time   float64
+	source         int
+	from           string
+	message        string
+	cur_session_id string
+	to             string
+	Attachement    []Attachement
+}
+
+type Attachement struct {
+	id        string
+	name      string
+	thumbnail string
+	types     string
+	width     int
+	height    int
+}
+
+type Server struct {
+	ServerName string
+	ServerIp   string
+}
+type ServerSlice struct {
+	Servers []Server `json:"servers"`
+}
 type List []int
 
 func (l List) Len() int {
